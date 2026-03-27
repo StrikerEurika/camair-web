@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+/* ── Base resets ─────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Custom scrollbar ────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0d1424; }
+::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2563eb; }
+
+/* ── Leaflet dark-mode overrides (cannot use Tailwind here) ─────────────── */
+.leaflet-container {
+  background: #0d1424 !important;
+  border-radius: 12px;
+}
+.leaflet-tile-pane {
+  filter: brightness(0.7) saturate(0.5) hue-rotate(200deg);
+}
+.leaflet-popup-content-wrapper {
+  background: #0f172a !important;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px !important;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.6) !important;
+  color: #f1f5f9 !important;
+}
+.leaflet-popup-tip {
+  background: #0f172a !important;
+}
+.leaflet-popup-close-button {
+  color: #64748b !important;
+}
+
+/* ── Keyframes (referenced by Tailwind animate-* utilities below) ────────── */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes pulse-ring {
+  0%   { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* ── Tailwind custom utilities ───────────────────────────────────────────── */
+@utility gradient-text {
+  background: linear-gradient(135deg, #60a5fa, #a78bfa, #34d399, #60a5fa);
+  background-size: 300% 300%;
+  animation: gradient-shift 6s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@utility skeleton {
+  background: linear-gradient(90deg, #1e293b 25%, #263247 50%, #1e293b 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@utility fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* AQI marker pulse — plain CSS (pseudo-element prevents @utility use) */
+.aqi-marker-pulse { position: relative; }
+.aqi-marker-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  animation: pulse-ring 2s ease-out infinite;
+  border: 2px solid currentColor;
+}
