@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Sidebar } from "../layout/Sidebar";
+// Sidebar is now handled by DashboardLayout
 import { Header } from "../layout/Header";
 import { MainWeatherCard } from "../components/weather/MainWeatherCard";
 import { ForecastSection } from "../components/weather/ForecastSection";
@@ -13,7 +13,7 @@ import type {
   AirQualityData,
   RainChanceData,
   UVIndexData,
-} from "@/types/weather";
+} from "../types/weather";
 
 // Mock data
 const mockCities: WeatherCity[] = [
@@ -140,7 +140,7 @@ const mockUVIndex: UVIndexData[] = [
   { day: "Sat", value: 7, level: "high" },
 ];
 
-export function WeatherDashboard() {
+export default function WeatherDashboard() {
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("theme");
@@ -166,89 +166,53 @@ export function WeatherDashboard() {
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
   return (
-    <div className="min-h-screen p-4 md:p-6 transition-colors duration-300">
-      <div className="max-w-400 mx-auto">
-        <div className="flex flex-col md:flex-row gap-6">
-          {/* Sidebar */}
-          <Sidebar />
+    <>
+      <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 
-          {/* Main content */}
-          <main className="flex-1">
-            {/* Header */}
-            <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+      {/* Main grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+        {/* Main weather card */}
+        <MainWeatherCard
+          location="New York, USA"
+          temperature={25}
+          condition="Sunny"
+          high={27}
+          low={10}
+          feelsLike={24}
+          sunrise="4:50 AM"
+          sunset="6:54 PM"
+          visibility={5}
+          windSpeed={7.9}
+          humidity={85}
+        />
 
-            {/* 10-day / General report toggle */}
-            {/* <div className="flex items-center justify-end gap-3 mb-6">
-              <div className="flex items-center bg-white dark:bg-slate-800/50 rounded-full border border-slate-200 dark:border-slate-700 px-4 py-2 transition-colors">
-                <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">
-                  10-day
-                </span>
-              </div>
-              <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white px-5 py-2 rounded-full text-sm font-semibold transition-all shadow-sm hover:shadow-md active:scale-95">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                  />
-                </svg>
-                General report
-              </button>
-            </div> */}
+        {/* Forecast section */}
+        <ForecastSection cities={mockCities} />
+      </div>
 
-            {/* Main grid */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-              {/* Main weather card */}
-              <MainWeatherCard
-                location="New York, USA"
-                temperature={25}
-                condition="Sunny"
-                high={27}
-                low={10}
-                feelsLike={24}
-                sunrise="4:50 AM"
-                sunset="6:54 PM"
-                visibility={5}
-                windSpeed={7.9}
-                humidity={85}
-              />
+      {/* Second row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Wind card */}
+        <WindCard
+          speed={45}
+          direction="W"
+          directionDegrees={270}
+          change={2.3}
+          timeAgo="1 hours ago"
+        />
 
-              {/* Forecast section */}
-              <ForecastSection cities={mockCities} />
-            </div>
-
-            {/* Second row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-              {/* Wind card */}
-              <WindCard
-                speed={45}
-                direction="W"
-                directionDegrees={270}
-                change={2.3}
-                timeAgo="1 hours ago"
-              />
-
-              {/* Weather map */}
-              <div className="lg:col-span-2">
-                <WeatherMap />
-              </div>
-            </div>
-
-            {/* Third row - Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <AirQualityCard data={mockAirQuality} />
-              <RainChanceCard data={mockRainChance} />
-              <UVIndexCard data={mockUVIndex} />
-            </div>
-          </main>
+        {/* Weather map */}
+        <div className="lg:col-span-2">
+          <WeatherMap />
         </div>
       </div>
-    </div>
+
+      {/* Third row - Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <AirQualityCard data={mockAirQuality} />
+        <RainChanceCard data={mockRainChance} />
+        <UVIndexCard data={mockUVIndex} />
+      </div>
+    </>
   );
 }
