@@ -80,9 +80,9 @@ export function AirQualityMap({ data, selectedProvince, onSelectProvince }: AirQ
             }}
           >
             <Popup>
-              <div className="p-1 min-w-[220px]">
+              <div className="p-1 min-w-[220px] bg-white dark:bg-slate-900 rounded-lg">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-base font-bold text-white">{record.name}</h3>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">{record.name}</h3>
                   <AqiBadge index={record.us_epa_index} />
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
@@ -94,13 +94,13 @@ export function AirQualityMap({ data, selectedProvince, onSelectProvince }: AirQ
                     { label: 'O₃',    value: `${record.o3} µg/m³` },
                     { label: 'SO₂',   value: `${record.so2} µg/m³` },
                   ].map(({ label, value }) => (
-                    <div key={label} className="bg-white/5 rounded-lg px-2 py-1.5">
-                      <span className="text-slate-400 block">{label}</span>
-                      <span className="text-white font-semibold">{value}</span>
+                    <div key={label} className="bg-slate-100 dark:bg-white/5 rounded-lg px-2 py-1.5">
+                      <span className="text-slate-500 dark:text-slate-400 block">{label}</span>
+                      <span className="text-slate-900 dark:text-white font-semibold">{value}</span>
                     </div>
                   ))}
                 </div>
-                <p className="text-slate-500 text-[10px] mt-2 pt-2 border-t border-white/10">
+                <p className="text-slate-500 dark:text-slate-500 text-[10px] mt-2 pt-2 border-t border-slate-200 dark:border-white/10">
                   Updated: {record.last_updated}
                 </p>
               </div>

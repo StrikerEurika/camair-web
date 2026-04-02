@@ -1,7 +1,48 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+  --color-brand-950: #172554;
+}
 
 /* ── Base resets ─────────────────────────────────────────────────────────── */
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --border: #e2e8f0;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
+  color-scheme: light;
+}
+
+.dark {
+  --background: #020617;
+  --foreground: #f8fafc;
+  --card: #0f172a;
+  --card-foreground: #f8fafc;
+  --border: #1e293b;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #1e293b;
+  --accent-foreground: #f8fafc;
+  color-scheme: dark;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -15,37 +56,26 @@ html, body, #root {
 body {
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ── Custom scrollbar ────────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #0d1424; }
-::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #2563eb; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; border: 2px solid transparent; background-clip: content-box; }
 
-/* ── Leaflet dark-mode overrides (cannot use Tailwind here) ─────────────── */
-.leaflet-container {
-  background: #0d1424 !important;
-  border-radius: 12px;
-}
-.leaflet-tile-pane {
-  filter: brightness(0.7) saturate(0.5) hue-rotate(200deg);
-}
-.leaflet-popup-content-wrapper {
-  background: #0f172a !important;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px !important;
-  box-shadow: 0 25px 50px rgba(0,0,0,0.6) !important;
-  color: #f1f5f9 !important;
-}
-.leaflet-popup-tip {
-  background: #0f172a !important;
-}
-.leaflet-popup-close-button {
-  color: #64748b !important;
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
 }
 
-/* ── Keyframes (referenced by Tailwind animate-* utilities below) ────────── */
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* ── Keyframes ──────────────────────────────────────────────────────────── */
 @keyframes gradient-shift {
   0%, 100% { background-position: 0% 50%; }
   50%       { background-position: 100% 50%; }
@@ -61,14 +91,9 @@ body {
   100% { background-position:  200% 0; }
 }
 
-@keyframes pulse-ring {
-  0%   { transform: scale(0.8); opacity: 1; }
-  100% { transform: scale(2.2); opacity: 0; }
-}
-
 /* ── Tailwind custom utilities ───────────────────────────────────────────── */
 @utility gradient-text {
-  background: linear-gradient(135deg, #60a5fa, #a78bfa, #34d399, #60a5fa);
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #10b981, #3b82f6);
   background-size: 300% 300%;
   animation: gradient-shift 6s ease infinite;
   -webkit-background-clip: text;
@@ -77,7 +102,7 @@ body {
 }
 
 @utility skeleton {
-  background: linear-gradient(90deg, #1e293b 25%, #263247 50%, #1e293b 75%);
+  background: linear-gradient(90deg, var(--muted) 25%, var(--accent) 50%, var(--muted) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 8px;
@@ -87,13 +112,8 @@ body {
   animation: fadeIn 0.4s ease forwards;
 }
 
-/* AQI marker pulse — plain CSS (pseudo-element prevents @utility use) */
-.aqi-marker-pulse { position: relative; }
-.aqi-marker-pulse::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  animation: pulse-ring 2s ease-out infinite;
-  border: 2px solid currentColor;
+@layer base {
+  button {
+    cursor: pointer;
+  }
 }

@@ -33,10 +33,10 @@ const COLUMNS: Column[] = [
 ];
 
 function SortIcon({ field, sortField, sortDir }: { field: SortField; sortField: SortField; sortDir: SortDirection }) {
-  if (field !== sortField) return <ChevronsUpDown className="w-3.5 h-3.5 text-slate-600" />;
+  if (field !== sortField) return <ChevronsUpDown className="w-3.5 h-3.5 text-slate-400 dark:text-slate-600" />;
   return sortDir === 'asc'
-    ? <ChevronUp className="w-3.5 h-3.5 text-blue-400" />
-    : <ChevronDown className="w-3.5 h-3.5 text-blue-400" />;
+    ? <ChevronUp className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
+    : <ChevronDown className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />;
 }
 
 export function ProvinceTable({ data, selectedProvince, onSelectProvince }: ProvinceTableProps) {
@@ -72,7 +72,7 @@ export function ProvinceTable({ data, selectedProvince, onSelectProvince }: Prov
   function formatValue(record: AirQualityRecord, col: Column): React.ReactNode {
     const val = record[col.key];
     if (col.key === 'us_epa_index') return <AqiBadge index={record.us_epa_index} />;
-    if (col.key === 'name')         return <span className="font-medium text-white">{record.name}</span>;
+    if (col.key === 'name')         return <span className="font-medium text-slate-900 dark:text-white">{record.name}</span>;
     if (col.key === 'last_updated') return <span className="text-slate-500 text-xs">{String(val)}</span>;
     if (typeof val === 'number')    return <span className="font-mono">{formatPollutant(val)}</span>;
     return String(val);
@@ -88,7 +88,7 @@ export function ProvinceTable({ data, selectedProvince, onSelectProvince }: Prov
           placeholder="Search province..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-[#0d1424] border border-white/[0.08] rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition"
+          className="w-full bg-slate-100 dark:bg-[#0d1424] border border-slate-200 dark:border-white/[0.08] rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition"
         />
       </div>
 

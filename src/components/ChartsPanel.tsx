@@ -29,9 +29,9 @@ function CustomBarTooltip({ active, payload }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
   const { name, value, payload: p } = payload[0];
   return (
-    <div className="bg-[#0f172a] border border-white/10 rounded-lg px-3 py-2 text-xs shadow-xl">
-      <p className="text-slate-400 mb-1">{p.province}</p>
-      <p className="text-white font-semibold">{name}: <span className="text-blue-400">{value.toFixed(1)} µg/m³</span></p>
+    <div className="bg-white dark:bg-[#0f172a] border border-slate-200/60 dark:border-white/10 rounded-lg px-3 py-2 text-xs shadow-xl">
+      <p className="text-slate-500 dark:text-slate-400 mb-1">{p.province}</p>
+      <p className="text-slate-900 dark:text-white font-semibold">{name}: <span className="text-blue-500 dark:text-blue-400">{value.toFixed(1)} µg/m³</span></p>
     </div>
   );
 }
@@ -70,8 +70,8 @@ interface DistTooltipProps {
 function CustomDistTooltip({ active, payload }: DistTooltipProps) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-[#0f172a] border border-white/10 rounded-lg px-3 py-2 text-xs shadow-xl">
-      <p className="text-white font-semibold">{payload[0].payload.label}: <span className="text-blue-400">{payload[0].value} province(s)</span></p>
+    <div className="bg-white dark:bg-[#0f172a] border border-slate-200/60 dark:border-white/10 rounded-lg px-3 py-2 text-xs shadow-xl">
+      <p className="text-slate-900 dark:text-white font-semibold">{payload[0].payload.label}: <span className="text-blue-500 dark:text-blue-400">{payload[0].value} province(s)</span></p>
     </div>
   );
 }
