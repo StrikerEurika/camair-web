@@ -7,4 +7,4 @@ export { WeatherMap } from "./WeatherMap";
 export { AirQualityCard } from "./AirQualityCard";
 export { RainChanceCard } from "./RainChanceCard";
 export { UVIndexCard } from "./UVIndexCard";
-export { WeatherDashboard } from "../../pages/WeatherDashboard";
+export { default as WeatherDashboard } from "../../pages/WeatherDashboard";
