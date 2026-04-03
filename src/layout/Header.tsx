@@ -56,18 +56,18 @@ export function Header({ darkMode, toggleDarkMode }: HeaderProps) {
         </div>
 
         {/* Notifications */}
-        <button className="w-11 h-11 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm">
+        {/* <button className="w-11 h-11 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm">
           <Bell className="w-5 h-5" />
-        </button>
+        </button> */}
 
         {/* Profile */}
-        <button className="w-11 h-11 rounded-full overflow-hidden border-2 border-white dark:border-slate-800 shadow-md ring-1 ring-slate-200 dark:ring-slate-700">
+        {/* <button className="w-11 h-11 rounded-full overflow-hidden border-2 border-white dark:border-slate-800 shadow-md ring-1 ring-slate-200 dark:ring-slate-700">
           <img 
             src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" 
             alt="Profile"
             className="w-full h-full object-cover"
           />
-        </button>
+        </button> */}
       </div>
     </header>
   );
