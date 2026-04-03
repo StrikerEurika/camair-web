@@ -5,6 +5,8 @@ import type { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { AirQualityRecord } from "@/types/airQuality";
 import { ProvinceMarker } from "@/components/air-quality";
+import { ProvinceMapOverlay } from "@/components/map/ProvinceMapOverlay";
+import cambodiaGeoJsonUrl from "@/assets/geoData/cambodia-provinces.geojson?url";
 
 function MapInitHandler({
   mapRef,
@@ -65,6 +67,12 @@ export function Map({
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution="&copy; OpenStreetMap contributors"
+        />
+        <ProvinceMapOverlay
+          geoJsonUrl={cambodiaGeoJsonUrl}
+          airQualityData={filteredData}
+          selectedProvince={selectedProvince}
+          onSelectProvince={onProvinceSelect}
         />
         {filteredData.map((record) => (
           <ProvinceMarker
