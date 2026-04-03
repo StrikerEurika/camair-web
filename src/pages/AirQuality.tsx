@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Cloud, Layers } from "lucide-react";
+import { Cloud, Layers, MapPin, Plus, Minus } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { fetchAirQuality } from "@/services/airQualityService";
 import type { AirQualityRecord } from "@/types/airQuality";
@@ -7,7 +7,8 @@ import {
   ViewOptionsPanel,
   ProvinceTable,
   StatsCards,
-  MapWithControls,
+  Map,
+  MapNavigators,
   PollutantSelector,
   MapSearchBar,
   ProvinceDetailsPanel,
@@ -123,24 +124,32 @@ export default function AirQuality() {
         <div className="lg:col-span-2">
           <Card glass className="overflow-hidden h-full">
             <div className="relative h-full min-h-137.5">
-              <Button
-                onClick={() => setViewOptionsOpen(true)}
-                className="absolute left-4 top-4 z-50 flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-              >
-                <Cloud className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  View Options
-                </span>
-              </Button>
+              {isMapReady && (
+                <>
+                  {/* View Options Button (Linked to View Options Panel) */}
+                  <Button
+                    onClick={() => setViewOptionsOpen(true)}
+                    className="absolute left-4 top-4 z-50 flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    <Cloud className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      View Options
+                    </span>
+                  </Button>
 
-              <MapSearchBar value={searchQuery} onChange={setSearchQuery} />
+                  {/* search bars */}
+                  <MapSearchBar value={searchQuery} onChange={setSearchQuery} />
 
-              <PollutantSelector
-                selected={selectedPollutant}
-                onSelect={setSelectedPollutant}
-              />
+                  {/* Pollutant selector for overlays */}
+                  <PollutantSelector
+                    selected={selectedPollutant}
+                    onSelect={setSelectedPollutant}
+                  />
+                </>
+              )}
 
-              <MapWithControls
+              {/* Map Display (Only map) */}
+              <Map
                 center={DEFAULT_CENTER}
                 zoom={DEFAULT_ZOOM}
                 loading={loading}
@@ -151,6 +160,16 @@ export default function AirQuality() {
                 onMapReady={() => setIsMapReady(true)}
               />
 
+              {/* map navigatros  */}
+              {isMapReady && (
+                <MapNavigators
+                  center={DEFAULT_CENTER}
+                  zoom={DEFAULT_ZOOM}
+                  mapRef={mapRef}
+                />
+              )}
+
+              {/* View Options Panel (Openned when View Options is clicked) */}
               <ViewOptionsPanel
                 isOpen={viewOptionsOpen}
                 onClose={() => setViewOptionsOpen(false)}
