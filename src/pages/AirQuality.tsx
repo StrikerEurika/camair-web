@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Cloud, Layers, MapPin, Plus, Minus } from "lucide-react";
+import { Cloud, Layers } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { fetchAirQuality } from "@/services/airQualityService";
 import type { AirQualityRecord } from "@/types/airQuality";
@@ -40,7 +40,7 @@ export default function AirQuality() {
 
   const mapRef = useRef<LeafletMap | null>(null);
   const DEFAULT_CENTER: [number, number] = [12.5657, 104.991];
-  const DEFAULT_ZOOM = 7;
+  const DEFAULT_ZOOM = 7.5;
 
   useEffect(() => {
     loadData();
