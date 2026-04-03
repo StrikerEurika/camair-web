@@ -217,3 +217,8 @@ body {
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 }
+
+/* Force Leaflet map tiles to be behind overlays */
+.leaflet-container {
+  z-index: 0 !important;
+}

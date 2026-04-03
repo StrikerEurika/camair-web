@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+import { useState, useEffect, useRef } from "react";
+import { MapContainer, TileLayer } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 import {
   Bell,
   Eye,
@@ -10,7 +10,6 @@ import {
   TrendingUp,
   X,
   Check,
-  ChevronDown,
   Target,
   Cloud,
   Droplets,
@@ -18,11 +17,12 @@ import {
   Thermometer,
   Activity,
   Layers,
-} from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { cn } from '@/lib/utils';
-import { fetchAirQuality } from '@/services/airQualityService';
-import type { AirQualityRecord } from '@/types/airQuality';
+  Crosshair,
+} from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { cn } from "@/lib/utils";
+import { fetchAirQuality } from "@/services/airQualityService";
+import type { AirQualityRecord } from "@/types/airQuality";
 import {
   MapController,
   AqiGauge,
@@ -30,27 +30,73 @@ import {
   ViewOptionsPanel,
   ProvinceTable,
   ProvinceMarker,
-} from '@/components/air-quality';
-import { Header } from '@/layout/Header';
+} from "@/components/air-quality";
+import { Header } from "@/layout/Header";
+import { Button } from "@/components/ui/button";
+import type { Map as LeafletMap } from "leaflet";
+import { useMap } from "react-leaflet";
+
+function MapInitHandler({ mapRef, onReady }: { mapRef: React.MutableRefObject<LeafletMap | null>; onReady: () => void }) {
+  const map = useMap();
+  useEffect(() => {
+    mapRef.current = map;
+    onReady();
+    console.log("Map instance initialized:", map);
+  }, [map, mapRef, onReady]);
+  return null;
+}
 
 const VIEW_OPTIONS = [
-  { id: 'pm25', label: 'PM2.5', enabled: true },
-  { id: 'pm10', label: 'PM10', enabled: true },
-  { id: 'o3', label: 'O3', enabled: true },
-  { id: 'no2', label: 'NO2', enabled: true },
-  { id: 'so2', label: 'SO2', enabled: false },
-  { id: 'co', label: 'CO', enabled: false },
-  { id: 'aqi-color', label: 'AQI Color Area', enabled: true },
+  { id: "pm25", label: "PM2.5", enabled: true },
+  { id: "pm10", label: "PM10", enabled: true },
+  { id: "o3", label: "O3", enabled: true },
+  { id: "no2", label: "NO2", enabled: true },
+  { id: "so2", label: "SO2", enabled: false },
+  { id: "co", label: "CO", enabled: false },
+  { id: "aqi-color", label: "AQI Color Area", enabled: true },
 ];
 
 // Pollutant configuration
-const POLLUTANT_CONFIG: Record<string, { label: string; unit: string; icon: React.ReactNode; color: string }> = {
-  pm2_5: { label: 'PM2.5', unit: 'µg/m³', icon: <Droplets className="w-3 h-3" />, color: '#ec4899' },
-  pm10: { label: 'PM10', unit: 'µg/m³', icon: <Droplets className="w-3 h-3" />, color: '#f59e0b' },
-  o3: { label: 'O3', unit: 'µg/m³', icon: <Cloud className="w-3 h-3" />, color: '#8b5cf6' },
-  no2: { label: 'NO2', unit: 'µg/m³', icon: <Wind className="w-3 h-3" />, color: '#ef4444' },
-  so2: { label: 'SO2', unit: 'µg/m³', icon: <Cloud className="w-3 h-3" />, color: '#06b6d4' },
-  co: { label: 'CO', unit: 'µg/m³', icon: <Wind className="w-3 h-3" />, color: '#10b981' },
+const POLLUTANT_CONFIG: Record<
+  string,
+  { label: string; unit: string; icon: React.ReactNode; color: string }
+> = {
+  pm2_5: {
+    label: "PM2.5",
+    unit: "µg/m³",
+    icon: <Droplets className="w-3 h-3" />,
+    color: "#ec4899",
+  },
+  pm10: {
+    label: "PM10",
+    unit: "µg/m³",
+    icon: <Droplets className="w-3 h-3" />,
+    color: "#f59e0b",
+  },
+  o3: {
+    label: "O3",
+    unit: "µg/m³",
+    icon: <Cloud className="w-3 h-3" />,
+    color: "#8b5cf6",
+  },
+  no2: {
+    label: "NO2",
+    unit: "µg/m³",
+    icon: <Wind className="w-3 h-3" />,
+    color: "#ef4444",
+  },
+  so2: {
+    label: "SO2",
+    unit: "µg/m³",
+    icon: <Cloud className="w-3 h-3" />,
+    color: "#06b6d4",
+  },
+  co: {
+    label: "CO",
+    unit: "µg/m³",
+    icon: <Wind className="w-3 h-3" />,
+    color: "#10b981",
+  },
 };
 
 export default function AirQuality() {
@@ -59,8 +105,13 @@ export default function AirQuality() {
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [viewOptionsOpen, setViewOptionsOpen] = useState(false);
   const [viewOptions, setViewOptions] = useState(VIEW_OPTIONS);
-  const [selectedPollutant, setSelectedPollutant] = useState('pm25');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedPollutant, setSelectedPollutant] = useState("pm25");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isMapReady, setIsMapReady] = useState(false);
+
+  const mapRef = useRef<LeafletMap | null>(null);
+  const DEFAULT_CENTER: [number, number] = [12.5657, 104.991];
+  const DEFAULT_ZOOM = 7;
 
   useEffect(() => {
     loadData();
@@ -72,19 +123,21 @@ export default function AirQuality() {
       const response = await fetchAirQuality();
       setData(response.data);
       // Select Phnom Penh by default if available
-      const phnomPenh = response.data.find(r => r.name === 'Phnom Penh');
+      const phnomPenh = response.data.find((r) => r.name === "Phnom Penh");
       if (phnomPenh) {
-        setSelectedProvince('Phnom Penh');
+        setSelectedProvince("Phnom Penh");
       }
     } catch (error) {
-      console.error('Failed to load air quality data:', error);
+      console.error("Failed to load air quality data:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const toggleOption = (id: string) => {
-    setViewOptions((prev) => prev.map((o) => (o.id === id ? { ...o, enabled: !o.enabled } : o)));
+    setViewOptions((prev) =>
+      prev.map((o) => (o.id === id ? { ...o, enabled: !o.enabled } : o)),
+    );
   };
 
   const handleApply = () => {
@@ -92,24 +145,30 @@ export default function AirQuality() {
   };
 
   const getSelectedRecord = () => {
-    return data.find(r => r.name === selectedProvince) || null;
+    return data.find((r) => r.name === selectedProvince) || null;
   };
 
   const selectedRecord = getSelectedRecord();
 
   // Filter data based on search
-  const filteredData = data.filter(r =>
-    r.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredData = data.filter((r) =>
+    r.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // Calculate statistics
   const stats = {
-    avgPm25: data.length > 0 ? data.reduce((acc, r) => acc + r.pm2_5, 0) / data.length : 0,
-    avgPm10: data.length > 0 ? data.reduce((acc, r) => acc + r.pm10, 0) / data.length : 0,
+    avgPm25:
+      data.length > 0
+        ? data.reduce((acc, r) => acc + r.pm2_5, 0) / data.length
+        : 0,
+    avgPm10:
+      data.length > 0
+        ? data.reduce((acc, r) => acc + r.pm10, 0) / data.length
+        : 0,
     provinces: data.length,
-    goodCount: data.filter(r => r.us_epa_index === 1).length,
-    moderateCount: data.filter(r => r.us_epa_index === 2).length,
-    unhealthyCount: data.filter(r => r.us_epa_index >= 3).length,
+    goodCount: data.filter((r) => r.us_epa_index === 1).length,
+    moderateCount: data.filter((r) => r.us_epa_index === 2).length,
+    unhealthyCount: data.filter((r) => r.us_epa_index >= 3).length,
   };
 
   const [darkMode, setDarkMode] = useState(() => {
@@ -150,8 +209,12 @@ export default function AirQuality() {
                 <Activity className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Provinces</p>
-                <p className="text-xl font-bold text-slate-900 dark:text-white">{stats.provinces}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Provinces
+                </p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">
+                  {stats.provinces}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -163,8 +226,12 @@ export default function AirQuality() {
                 <Cloud className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Good AQI</p>
-                <p className="text-xl font-bold text-slate-900 dark:text-white">{stats.goodCount}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Good AQI
+                </p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">
+                  {stats.goodCount}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -176,8 +243,12 @@ export default function AirQuality() {
                 <Thermometer className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
               </div>
               <div>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Moderate</p>
-                <p className="text-xl font-bold text-slate-900 dark:text-white">{stats.moderateCount}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Moderate
+                </p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">
+                  {stats.moderateCount}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -189,8 +260,12 @@ export default function AirQuality() {
                 <Wind className="w-5 h-5 text-red-600 dark:text-red-400" />
               </div>
               <div>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Unhealthy</p>
-                <p className="text-xl font-bold text-slate-900 dark:text-white">{stats.unhealthyCount}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Unhealthy
+                </p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">
+                  {stats.unhealthyCount}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -203,16 +278,17 @@ export default function AirQuality() {
           <Card glass className="overflow-hidden h-full">
             <div className="relative h-full min-h-137.5">
               {/* View Options Button */}
-              <button
+              <Button
                 onClick={() => setViewOptionsOpen(true)}
-                className="absolute left-4 top-4 z-[400] flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                className="absolute left-4 top-4 z-50 flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
               >
                 <Eye className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">View Options</span>
-              </button>
-
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  View Options
+                </span>
+              </Button>
               {/* Search Bar */}
-              <div className="absolute right-4 top-4 z-[400] flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 min-w-[280px]">
+              <div className="absolute right-4 top-4 z-50 flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 min-w-70">
                 <MapPin className="w-4 h-4 text-slate-400" />
                 <input
                   type="text"
@@ -222,43 +298,45 @@ export default function AirQuality() {
                   placeholder="Search province..."
                 />
               </div>
-
               {/* Pollutant Selector */}
-              <div className="absolute left-4 bottom-4 z-[400] flex gap-2">
-                {(['pm25', 'pm10', 'o3', 'no2'] as const).map((p) => (
+              <div className="absolute left-4 bottom-4 z-50 flex gap-2">
+                {(["pm25", "pm10", "o3", "no2"] as const).map((p) => (
                   <button
                     key={p}
                     onClick={() => setSelectedPollutant(p)}
                     className={cn(
-                      'px-3 py-1.5 text-xs font-medium rounded-lg transition-colors',
+                      "px-3 py-1.5 text-xs font-medium rounded-lg transition-colors",
                       selectedPollutant === p
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+                        ? "bg-blue-600 text-white"
+                        : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700",
                     )}
                   >
-                    {POLLUTANT_CONFIG[p === 'pm25' ? 'pm2_5' : p]?.label || p.toUpperCase()}
+                    {POLLUTANT_CONFIG[p === "pm25" ? "pm2_5" : p]?.label ||
+                      p.toUpperCase()}
                   </button>
                 ))}
               </div>
-
               {/* Map */}
               {loading ? (
                 <div className="w-full h-full skeleton flex items-center justify-center">
-                  <span className="text-slate-500 dark:text-slate-400">Loading map...</span>
+                  <span className="text-slate-500 dark:text-slate-400">
+                    Loading map...
+                  </span>
                 </div>
               ) : (
                 <MapContainer
-                  center={[12.5657, 104.9910]} // Cambodia center
-                  zoom={7}
+                  center={DEFAULT_CENTER}
+                  zoom={DEFAULT_ZOOM}
                   className="w-full h-full"
                   zoomControl={false}
                   attributionControl={false}
                 >
+                  <MapInitHandler mapRef={mapRef} onReady={() => setIsMapReady(true)} />
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution="&copy; OpenStreetMap contributors"
                   />
-                  <MapController center={[12.5657, 104.9910]} zoom={7} />
+                  <MapController center={DEFAULT_CENTER} zoom={DEFAULT_ZOOM} />
 
                   {/* Province Markers */}
                   {filteredData.map((record) => (
@@ -271,9 +349,29 @@ export default function AirQuality() {
                   ))}
                 </MapContainer>
               )}
-
-              {/* Map Controls */}
+              {/* In your map controls overlay: */}
               <div className="absolute right-4 bottom-4 z-[400] flex flex-col gap-2">
+                <Button
+                  className="w-10 h-10 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  onClick={() => {
+                    if (mapRef.current) {
+                      console.log(
+                        "Resetting map position to:",
+                        DEFAULT_CENTER,
+                        DEFAULT_ZOOM,
+                      );
+                      mapRef.current.setView(DEFAULT_CENTER, DEFAULT_ZOOM);
+                    } else {
+                      console.error("Map reference is not initialized.");
+                    }
+                  }}
+                  disabled={!isMapReady}
+                  title="Reset map position"
+                >
+                  <Crosshair className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                </Button>
+
+                {/* Map Controls */}
                 <button className="w-10 h-10 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                   <Plus className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                 </button>
@@ -281,7 +379,6 @@ export default function AirQuality() {
                   <Minus className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                 </button>
               </div>
-
               {/* View Options Panel */}
               <ViewOptionsPanel
                 isOpen={viewOptionsOpen}
@@ -381,10 +478,18 @@ export default function AirQuality() {
               <Cloud className="w-5 h-5 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <p className="font-medium text-slate-900 dark:text-white">Health Tips</p>
+              <p className="font-medium text-slate-900 dark:text-white">
+                Health Tips
+              </p>
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                Air quality is {stats.goodCount > stats.unhealthyCount ? 'generally good' : 'variable'}. 
-                {stats.unhealthyCount > 0 ? 'Some provinces have unhealthy levels - limit outdoor activities.' : 'Perfect time for outdoor activities!'}
+                Air quality is{" "}
+                {stats.goodCount > stats.unhealthyCount
+                  ? "generally good"
+                  : "variable"}
+                .
+                {stats.unhealthyCount > 0
+                  ? "Some provinces have unhealthy levels - limit outdoor activities."
+                  : "Perfect time for outdoor activities!"}
               </p>
             </div>
           </div>
