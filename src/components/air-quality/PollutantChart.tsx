@@ -13,11 +13,7 @@ import {
 // type
 import type { AirQualityRecord } from "@/types/air-quality.types";
 
-export function PollutantChart({
-  data,
-}: {
-  data: AirQualityRecord | null;
-}) {
+export function PollutantChart({ data }: { data: AirQualityRecord | null }) {
   if (!data) {
     return (
       <div className="h-64 flex items-center justify-center text-slate-400">
@@ -50,7 +46,7 @@ export function PollutantChart({
             type="category"
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 12, fill: "oklch(var(--foreground))" }}
+            tick={{ fontSize: 12, fill: "var(--foreground)" }}
             width={50}
           />
           <Tooltip
@@ -59,19 +55,19 @@ export function PollutantChart({
                 const d = payload[0].payload;
                 const actualValue = d.name === "CO" ? d.value * 10 : d.value;
                 return (
-                  <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 p-3">
+                  <div className="bg-white dark:bg-slate-700 rounded-lg shadow-lg border border-slate-200 dark:border-slate-600 p-3">
                     <div className="flex items-center gap-2">
                       <div
                         className="w-3 h-3 rounded-full"
                         style={{ backgroundColor: d.fill }}
                       />
-                      <span className="font-medium text-slate-900 dark:text-white">
+                      <span className="font-medium text-slate-900 dark:text-slate-200">
                         {d.name}
                       </span>
                     </div>
-                    <p className="text-lg font-bold text-slate-900 dark:text-white mt-1">
+                    <p className="text-lg font-bold text-slate-900 dark:text-slate-100 mt-1">
                       {actualValue.toFixed(1)}{" "}
-                      <span className="text-xs font-normal text-slate-500">
+                      <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
                         µg/m³
                       </span>
                     </p>

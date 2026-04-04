@@ -206,7 +206,8 @@ export default function AirQuality() {
         </CardContent>
       </Card>
 
-      <HealthTipsBanner stats={stats} />
+      {/* Health Tips Banner */}
+      {/* <HealthTipsBanner stats={stats} /> */}
     </div>
   );
 }
