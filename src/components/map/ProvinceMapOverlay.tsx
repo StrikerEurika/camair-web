@@ -1,24 +1,75 @@
-import { useEffect, useState, useRef } from 'react';
-import { GeoJSON, useMap } from 'react-leaflet';
-import L, { type LeafletEvent } from 'leaflet';
-import type { GeoJsonData, GeoJsonFeature } from '@/types/airquality.types';
-import type { AirQualityRecord } from '@/types/airQuality';
-import { getAqiInfo } from '@/utils/aqiUtils';
+import { useEffect, useState, useRef } from "react";
+import { GeoJSON, useMap } from "react-leaflet";
+import L, { type LeafletEvent } from "leaflet";
+import type {
+  GeoJsonData,
+  GeoJsonFeature,
+  PollutantType,
+} from "@/types/airquality.types";
+import type { AirQualityRecord } from "@/types/airQuality";
+import { POLLUTANT_CONFIG } from "@/config/pollutant.config";
+import { getAqiInfo } from "@/utils/aqiUtils";
+
+import { formatToUTC7Intl, formatToUTC7 } from "@/utils/time";
 
 interface ProvinceMapOverlayProps {
   geoJsonUrl: string;
   airQualityData: AirQualityRecord[];
   selectedProvince: string | null;
   onSelectProvince: (name: string) => void;
+  selectedPollutant: string;
 }
 
-function findProvinceData(name: string, data: AirQualityRecord[]): AirQualityRecord | null {
+const POLLUTANT_KEY_MAP: Record<string, PollutantType> = {
+  pm25: "pm2_5",
+  pm10: "pm10",
+  o3: "o3",
+  no2: "no2",
+  so2: "so2",
+  co: "co",
+};
+
+function findProvinceData(
+  name: string,
+  data: AirQualityRecord[],
+): AirQualityRecord | null {
   return data.find((d) => d.name.toLowerCase() === name.toLowerCase()) ?? null;
 }
 
-function getProvinceFillColor(record: AirQualityRecord | null): string {
-  if (!record) return '#d1d5db';
-  return getAqiInfo(record.us_epa_index).hex;
+function getProvinceValue(
+  record: AirQualityRecord | null,
+  pollutantKey: PollutantType,
+): number | null {
+  if (!record) return null;
+  return record[pollutantKey] ?? null;
+}
+
+function getProvinceFillColor(
+  value: number | null,
+  pollutantKey: PollutantType,
+): string {
+  if (value === null) return "#d1d5db";
+  const config = POLLUTANT_CONFIG[pollutantKey];
+  for (let i = 0; i < config.bins.length; i++) {
+    if (value <= config.bins[i]) {
+      return config.colors[i];
+    }
+  }
+  return config.colors[config.colors.length - 1];
+}
+
+function getHealthCategory(
+  value: number | null,
+  pollutantKey: PollutantType,
+): string {
+  if (value === null) return "No Data";
+  const config = POLLUTANT_CONFIG[pollutantKey];
+  for (let i = 0; i < config.bins.length; i++) {
+    if (value <= config.bins[i]) {
+      return config.labels[i];
+    }
+  }
+  return config.labels[config.labels.length - 1];
 }
 
 function ProvinceGeoJSON({
@@ -26,55 +77,120 @@ function ProvinceGeoJSON({
   airQualityData,
   selectedProvince,
   onSelectProvince,
+  selectedPollutant,
 }: {
   geoJsonData: GeoJsonData;
   airQualityData: AirQualityRecord[];
   selectedProvince: string | null;
   onSelectProvince: (name: string) => void;
+  selectedPollutant: string;
 }) {
   const map = useMap();
   const geoJsonRef = useRef<L.GeoJSON | null>(null);
+  const pollutantKey = POLLUTANT_KEY_MAP[selectedPollutant] ?? "pm2_5";
+  const config = POLLUTANT_CONFIG[pollutantKey];
 
   const styleProvince = (feature?: GeoJsonFeature) => {
     if (!feature) return {};
     const name = feature.properties.adm1_name;
     const record = findProvinceData(name, airQualityData);
+    const value = getProvinceValue(record, pollutantKey);
     const isSelected = selectedProvince === name;
 
     return {
-      fillColor: getProvinceFillColor(record),
+      fillColor: getProvinceFillColor(value, pollutantKey),
       weight: isSelected ? 3 : 1.5,
       opacity: 1,
-      color: isSelected ? '#1e293b' : '#ffffff',
+      color: isSelected ? "#1e293b" : "#ffffff",
       fillOpacity: isSelected ? 0.9 : 0.7,
     };
   };
 
   const highlightProvince = (e: LeafletEvent) => {
     const layer = e.target as L.Path;
-    layer.setStyle({ weight: 3, color: '#334155', fillOpacity: 0.85 });
+    const currentStyle = (layer as any).options || {};
+    layer.setStyle({
+      weight: 3,
+      color: "#334155",
+      fillColor: currentStyle.fillColor,
+      fillOpacity: 0.85,
+    });
     layer.bringToFront();
   };
 
   const resetHighlight = (e: LeafletEvent) => {
     const layer = e.target as L.Path;
-    if (geoJsonRef.current) {
-      geoJsonRef.current.resetStyle(layer);
+    const feat = (layer as any).feature as GeoJsonFeature | undefined;
+    if (feat) {
+      layer.setStyle(styleProvince(feat) as L.PathOptions);
     }
   };
 
   const onEachProvince = (feature: GeoJsonFeature, layer: L.Layer) => {
     const name = feature.properties.adm1_name;
     const record = findProvinceData(name, airQualityData);
+    const value = getProvinceValue(record, pollutantKey);
+    const category = getHealthCategory(value, pollutantKey);
 
     const tooltipContent = record
-      ? `<div class="p-2 text-sm"><strong>${name}</strong><br/>AQI: ${record.us_epa_index}<br/>PM2.5: ${record.pm2_5} µg/m³</div>`
+      ? `<div class="p-2 text-sm"><strong>${name}</strong><br/>${config.name}: ${value} ${config.unit}<br/><span style="color: ${getProvinceFillColor(value, pollutantKey)}">${category}</span></div>`
       : `<div class="p-2 text-sm"><strong>${name}</strong><br/>No data</div>`;
 
-    layer.bindTooltip(tooltipContent, { sticky: true, className: 'custom-tooltip' });
+    layer.bindTooltip(tooltipContent, {
+      sticky: true,
+      className: "custom-tooltip",
+    });
+
+    if (record) {
+      const aqiInfo = getAqiInfo(record.us_epa_index);
+      const popupContent = `
+        <div style="padding: 8px; min-width: 220px; font-family: inherit;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <strong style="font-size: 14px;">${name}</strong>
+            <span style="background: ${aqiInfo.hex}; color: white; padding: 2px 8px; border-radius: 9999px; font-size: 11px;">${aqiInfo.label}</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+            <div style="background: #f1f5f9; border-radius: 8px; padding: 6px 8px;">
+              <span style="color: #64748b; display: block; font-size: 10px;">PM2.5</span>
+              <span style="font-weight: 600;">${record.pm2_5.toFixed(1)} µg/m³</span>
+            </div>
+            <div style="background: #f1f5f9; border-radius: 8px; padding: 6px 8px;">
+              <span style="color: #64748b; display: block; font-size: 10px;">PM10</span>
+              <span style="font-weight: 600;">${record.pm10.toFixed(1)} µg/m³</span>
+            </div>
+            <div style="background: #f1f5f9; border-radius: 8px; padding: 6px 8px;">
+              <span style="color: #64748b; display: block; font-size: 10px;">O3</span>
+              <span style="font-weight: 600;">${record.o3.toFixed(1)} µg/m³</span>
+            </div>
+            <div style="background: #f1f5f9; border-radius: 8px; padding: 6px 8px;">
+              <span style="color: #64748b; display: block; font-size: 10px;">NO2</span>
+              <span style="font-weight: 600;">${record.no2.toFixed(1)} µg/m³</span>
+            </div>
+            <div style="background: #f1f5f9; border-radius: 8px; padding: 6px 8px;">
+              <span style="color: #64748b; display: block; font-size: 10px;">SO2</span>
+              <span style="font-weight: 600;">${record.so2.toFixed(1)} µg/m³</span>
+            </div>
+            <div style="background: #f1f5f9; border-radius: 8px; padding: 6px 8px;">
+              <span style="color: #64748b; display: block; font-size: 10px;">CO</span>
+              <span style="font-weight: 600;">${record.co.toFixed(1)} µg/m³</span>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #64748b;">
+            <span>US EPA: ${record.us_epa_index}</span>
+            <span>DEFRA: ${record.gb_defra_index}</span>
+          </div>
+          <p style="font-size: 10px; color: #94a3b8; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0;">
+            Updated: ${record.last_updated ? formatToUTC7Intl(new Date(record.last_updated)) : "No Data"}
+          </p>
+        </div>
+      `;
+      layer.bindPopup(popupContent, { closeButton: false, offset: [0, -10] });
+    }
 
     layer.on({
-      click: () => onSelectProvince(name),
+      click: () => {
+        onSelectProvince(name);
+      },
       mouseover: highlightProvince,
       mouseout: resetHighlight,
     } as L.LeafletEventHandlerFnMap);
@@ -99,18 +215,30 @@ function ProvinceGeoJSON({
         if (feat) {
           const name = feat.properties.adm1_name;
           const record = findProvinceData(name, airQualityData);
+          const value = getProvinceValue(record, pollutantKey);
           const isSelected = selectedProvince === name;
 
           (layer as L.Path).setStyle({
-            fillColor: getProvinceFillColor(record),
+            fillColor: getProvinceFillColor(value, pollutantKey),
             weight: isSelected ? 3 : 1.5,
-            color: isSelected ? '#1e293b' : '#ffffff',
+            color: isSelected ? "#1e293b" : "#ffffff",
             fillOpacity: isSelected ? 0.9 : 0.7,
+          });
+
+          const category = getHealthCategory(value, pollutantKey);
+          const tooltipContent = record
+            ? `<div class="p-2 text-sm"><strong>${name}</strong><br/>${config.name}: ${value} ${config.unit}<br/><span style="color: ${getProvinceFillColor(value, pollutantKey)}">${category}</span></div>`
+            : `<div class="p-2 text-sm"><strong>${name}</strong><br/>No data</div>`;
+
+          layer.unbindTooltip();
+          layer.bindTooltip(tooltipContent, {
+            sticky: true,
+            className: "custom-tooltip",
           });
         }
       });
     }
-  }, [airQualityData, selectedProvince]);
+  }, [airQualityData, selectedProvince, selectedPollutant]);
 
   return (
     <GeoJSON
@@ -127,6 +255,7 @@ export function ProvinceMapOverlay({
   airQualityData,
   selectedProvince,
   onSelectProvince,
+  selectedPollutant,
 }: ProvinceMapOverlayProps) {
   const [geoJsonData, setGeoJsonData] = useState<GeoJsonData | null>(null);
 
@@ -145,6 +274,7 @@ export function ProvinceMapOverlay({
       airQualityData={airQualityData}
       selectedProvince={selectedProvince}
       onSelectProvince={onSelectProvince}
+      selectedPollutant={selectedPollutant}
     />
   );
 }

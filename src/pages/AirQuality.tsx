@@ -56,7 +56,10 @@ export default function AirQuality() {
         setSelectedProvince("Phnom Penh");
       }
     } catch (error) {
-      console.error("Failed to load air quality data:", error);
+      console.warn("API unavailable, using mock data:", error);
+      const response = await fetchAirQuality();
+      setData(response.data);
+      setSelectedProvince("Phnom Penh");
     } finally {
       setLoading(false);
     }
@@ -158,6 +161,7 @@ export default function AirQuality() {
                 onProvinceSelect={setSelectedProvince}
                 mapRef={mapRef}
                 onMapReady={() => setIsMapReady(true)}
+                selectedPollutant={selectedPollutant}
               />
 
               {/* map navigatros  */}

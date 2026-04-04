@@ -10,12 +10,16 @@ interface ProvinceMarkerProps {
 }
 
 export function ProvinceMarker({ record, isSelected, onClick }: ProvinceMarkerProps) {
+  if (typeof record.lat !== 'number' || typeof record.lng !== 'number') {
+    return null;
+  }
+
   const aqiInfo = getAqiInfo(record.us_epa_index);
   const baseRadius = record.us_epa_index * 8 + 10;
 
   return (
     <CircleMarker
-      center={[record.lat!, record.lng!]}
+      center={[record.lat, record.lng]}
       radius={isSelected ? baseRadius + 10 : baseRadius}
       pathOptions={{
         color: aqiInfo.hex,

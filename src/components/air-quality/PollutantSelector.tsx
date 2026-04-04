@@ -1,5 +1,6 @@
 import { Droplets, Cloud, Wind } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
 
 const POLLUTANT_CONFIG: Record<
   string,
@@ -52,7 +53,7 @@ export function PollutantSelector({ selected, onSelect }: PollutantSelectorProps
   return (
     <div className="absolute left-4 bottom-4 z-50 flex gap-2">
       {(["pm25", "pm10", "o3", "no2"] as const).map((p) => (
-        <button
+        <Button
           key={p}
           onClick={() => onSelect(p)}
           className={cn(
@@ -64,7 +65,7 @@ export function PollutantSelector({ selected, onSelect }: PollutantSelectorProps
         >
           {POLLUTANT_CONFIG[p === "pm25" ? "pm2_5" : p]?.label ||
             p.toUpperCase()}
-        </button>
+        </Button>
       ))}
     </div>
   );

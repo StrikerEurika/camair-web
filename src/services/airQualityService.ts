@@ -1,4 +1,5 @@
 import type { AirQualityRecord, ApiResponse } from '../types/airQuality';
+import { MOCK_AIR_QUALITY_DATA } from '../data/mockAirQualityData';
 
 // Province geographic coordinates (lat/lng) for map placement
 const PROVINCE_COORDS: Record<string, [number, number]> = {
@@ -85,7 +86,7 @@ export async function fetchAirQuality(): Promise<ApiResponse> {
     // If the DB is empty (e.g., Spark hasn't run yet), fall back to mock
     if (!json.data || json.data.length === 0) {
       console.warn('API returned no data — using mock data as fallback.');
-      return { data: MOCK_DATA };
+      return { data: MOCK_AIR_QUALITY_DATA };
     }
 
     // Attach coordinates (the DB doesn't store lat/lng, the frontend knows them)
@@ -97,7 +98,15 @@ export async function fetchAirQuality(): Promise<ApiResponse> {
     return { data: enriched };
   } catch (err) {
     console.warn('Could not reach API — using mock data as fallback.', err);
-    return { data: MOCK_DATA };
+    const enriched = MOCK_AIR_QUALITY_DATA.map((r) => {
+      const coords = PROVINCE_COORDS[r.name];
+      return {
+        ...r,
+        lat: coords?.[0],
+        lng: coords?.[1],
+      };
+    });
+    return { data: enriched };
   }
 }
 

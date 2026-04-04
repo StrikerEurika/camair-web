@@ -4,7 +4,6 @@ import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import type { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { AirQualityRecord } from "@/types/airQuality";
-import { ProvinceMarker } from "@/components/air-quality";
 import { ProvinceMapOverlay } from "@/components/map/ProvinceMapOverlay";
 import cambodiaGeoJsonUrl from "@/assets/geoData/cambodia-provinces.geojson?url";
 
@@ -32,6 +31,7 @@ interface MapProps {
   onProvinceSelect: (name: string) => void;
   mapRef: React.MutableRefObject<LeafletMap | null>;
   onMapReady: () => void;
+  selectedPollutant: string;
 }
 
 export function Map({
@@ -43,6 +43,7 @@ export function Map({
   onProvinceSelect,
   mapRef,
   onMapReady,
+  selectedPollutant,
 }: MapProps) {
   if (loading) {
     return (
@@ -73,15 +74,8 @@ export function Map({
           airQualityData={filteredData}
           selectedProvince={selectedProvince}
           onSelectProvince={onProvinceSelect}
+          selectedPollutant={selectedPollutant}
         />
-        {filteredData.map((record) => (
-          <ProvinceMarker
-            key={record.id}
-            record={record}
-            isSelected={selectedProvince === record.name}
-            onClick={() => onProvinceSelect(record.name)}
-          />
-        ))}
       </MapContainer>
     </div>
   );
