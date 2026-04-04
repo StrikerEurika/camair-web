@@ -22,7 +22,7 @@ export function AqiGauge({
     <div className="relative">
       {/* Gauge Arc */}
       <div className="relative h-40 w-full">
-        <svg viewBox="0 0 200 120" className="w-full h-full">
+        <svg viewBox="0 10 200 150" className="w-full h-full">
           {/* Background Arc */}
           <path
             d="M 20 100 A 80 80 0 0 1 180 100"
@@ -65,7 +65,7 @@ export function AqiGauge({
         </svg>
         {/* Value Display */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pt-4">
-          <span className="text-5xl font-bold text-slate-900 dark:text-white">
+          <span className="text-4xl font-bold text-slate-900 dark:text-white">
             {value}
           </span>
           <span className="text-sm text-slate-500 dark:text-slate-400 mt-1">
