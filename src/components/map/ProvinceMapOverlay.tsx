@@ -11,38 +11,21 @@ import { POLLUTANT_CONFIG } from "@/config/pollutant.config";
 import { getAqiInfo } from "@/utils/aqi-utils";
 import { getProvinceColor, getHealthCategory } from "@/utils/air-quality.utils";
 
-import { formatToUTC7Intl, formatToUTC7 } from "@/utils/time";
+import { formatToUTC7Intl } from "@/utils/time";
 
 interface ProvinceMapOverlayProps {
   geoJsonUrl: string;
   airQualityData: AirQualityRecord[];
   selectedProvince: string | null;
   onSelectProvince: (name: string) => void;
-  selectedPollutant: string;
+  selectedPollutant: PollutantType | "none";
 }
-
-const POLLUTANT_KEY_MAP: Record<string, PollutantType> = {
-  pm25: "pm2_5",
-  pm10: "pm10",
-  o3: "o3",
-  no2: "no2",
-  so2: "so2",
-  co: "co",
-};
 
 function findProvinceData(
   name: string,
   data: AirQualityRecord[],
 ): AirQualityRecord | null {
   return data.find((d) => d.name.toLowerCase() === name.toLowerCase()) ?? null;
-}
-
-function getProvinceValue(
-  record: AirQualityRecord | null,
-  pollutantKey: PollutantType,
-): number | null {
-  if (!record) return null;
-  return record[pollutantKey] ?? null;
 }
 
 function ProvinceGeoJSON({
@@ -56,18 +39,18 @@ function ProvinceGeoJSON({
   airQualityData: AirQualityRecord[];
   selectedProvince: string | null;
   onSelectProvince: (name: string) => void;
-  selectedPollutant: string;
+  selectedPollutant: PollutantType;
 }) {
   const map = useMap();
   const geoJsonRef = useRef<L.GeoJSON | null>(null);
-  const pollutantKey = POLLUTANT_KEY_MAP[selectedPollutant] ?? "pm2_5";
+  const pollutantKey = selectedPollutant;
   const config = POLLUTANT_CONFIG[pollutantKey];
 
   const styleProvince = (feature?: GeoJsonFeature) => {
     if (!feature) return {};
     const name = feature.properties.adm1_name;
     const record = findProvinceData(name, airQualityData);
-    const value = getProvinceValue(record, pollutantKey);
+    const value = record?.[pollutantKey] ?? null;
     const isSelected = selectedProvince === name;
 
     return {
@@ -102,7 +85,7 @@ function ProvinceGeoJSON({
   const onEachProvince = (feature: GeoJsonFeature, layer: L.Layer) => {
     const name = feature.properties.adm1_name;
     const record = findProvinceData(name, airQualityData);
-    const value = getProvinceValue(record, pollutantKey);
+    const value = record?.[pollutantKey] ?? null;
     const category = getHealthCategory(value, pollutantKey);
 
     const tooltipContent = record
@@ -181,40 +164,11 @@ function ProvinceGeoJSON({
     }
   }, [selectedProvince, map]);
 
-  useEffect(() => {
-    if (geoJsonRef.current) {
-      geoJsonRef.current.eachLayer((layer) => {
-        const feat = (layer as L.GeoJSON).feature as GeoJsonFeature | undefined;
-        if (feat) {
-          const name = feat.properties.adm1_name;
-          const record = findProvinceData(name, airQualityData);
-          const value = getProvinceValue(record, pollutantKey);
-          const isSelected = selectedProvince === name;
-
-          (layer as L.Path).setStyle({
-            fillColor: getProvinceColor(value, pollutantKey),
-            weight: isSelected ? 3 : 1.5,
-            color: isSelected ? "#1e293b" : "#ffffff",
-            fillOpacity: isSelected ? 0.9 : 0.7,
-          });
-
-          const category = getHealthCategory(value, pollutantKey);
-          const tooltipContent = record
-            ? `<div class="p-2 text-sm"><strong>${name}</strong><br/>${config.name}: ${value} ${config.unit}<br/><span style="color: ${getProvinceColor(value, pollutantKey)}">${category}</span></div>`
-            : `<div class="p-2 text-sm"><strong>${name}</strong><br/>No data</div>`;
-
-          layer.unbindTooltip();
-          layer.bindTooltip(tooltipContent, {
-            sticky: true,
-            className: "custom-tooltip",
-          });
-        }
-      });
-    }
-  }, [airQualityData, selectedProvince, selectedPollutant]);
+  const geoJsonKey = `${pollutantKey}-${selectedProvince ?? "none"}`;
 
   return (
     <GeoJSON
+      key={geoJsonKey}
       data={geoJsonData as any}
       style={styleProvince as any}
       onEachFeature={onEachProvince as any}
@@ -239,7 +193,7 @@ export function ProvinceMapOverlay({
       .catch(() => setGeoJsonData(null));
   }, [geoJsonUrl]);
 
-  if (!geoJsonData) return null;
+  if (!geoJsonData || selectedPollutant === "none") return null;
 
   return (
     <ProvinceGeoJSON

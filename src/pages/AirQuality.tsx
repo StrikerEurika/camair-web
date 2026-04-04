@@ -34,7 +34,7 @@ export default function AirQuality() {
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [viewOptionsOpen, setViewOptionsOpen] = useState(false);
   const [viewOptions, setViewOptions] = useState(VIEW_OPTIONS);
-  const [selectedPollutant, setSelectedPollutant] = useState<PollutantType>("pm2_5");
+  const [selectedPollutant, setSelectedPollutant] = useState<PollutantType | "none">("none");
   const [searchQuery, setSearchQuery] = useState("");
   const [isMapReady, setIsMapReady] = useState(false);
 

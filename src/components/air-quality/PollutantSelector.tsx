@@ -1,4 +1,4 @@
-import { Droplets, Cloud, Wind } from "lucide-react";
+import { Droplets, Cloud, Wind, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import type { PollutantType } from "@/types/air-quality.types";
@@ -13,28 +13,38 @@ const ICON_MAP: Record<PollutantType, React.ReactNode> = {
   co: <Wind className="w-3 h-3" />,
 };
 
-const VISIBLE_POLLUTANTS: PollutantType[] = ["pm2_5", "pm10", "o3", "no2"];
+type LayerOption = PollutantType | "none";
+
+const LAYER_OPTIONS: { key: LayerOption; label: string; icon: React.ReactNode }[] = [
+  { key: "none", label: "Plain", icon: <Map className="w-3 h-3" /> },
+  ...(["pm2_5", "pm10", "o3", "no2"] as PollutantType[]).map((p) => ({
+    key: p,
+    label: POLLUTANT_CONFIG[p].name,
+    icon: ICON_MAP[p],
+  })),
+];
 
 interface PollutantSelectorProps {
-  selected: PollutantType;
-  onSelect: (pollutant: PollutantType) => void;
+  selected: LayerOption;
+  onSelect: (pollutant: LayerOption) => void;
 }
 
 export function PollutantSelector({ selected, onSelect }: PollutantSelectorProps) {
   return (
     <div className="absolute left-4 bottom-4 z-50 flex gap-2">
-      {VISIBLE_POLLUTANTS.map((p) => (
+      {LAYER_OPTIONS.map((opt) => (
         <Button
-          key={p}
-          onClick={() => onSelect(p)}
+          key={opt.key}
+          onClick={() => onSelect(opt.key)}
           className={cn(
-            "px-3 py-1.5 text-xs font-medium rounded-lg transition-colors",
-            selected === p
+            "px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5",
+            selected === opt.key
               ? "bg-blue-600 text-white"
               : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700",
           )}
         >
-          {POLLUTANT_CONFIG[p].name}
+          {opt.icon}
+          {opt.label}
         </Button>
       ))}
     </div>
