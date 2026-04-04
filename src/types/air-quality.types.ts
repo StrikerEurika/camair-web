@@ -1,7 +1,10 @@
-export type PollutantType = 'pm2_5' | 'pm10' | 'o3' | 'no2' | 'so2' | 'co';
+import type { ReactNode } from "react";
+
+export type PollutantType = "pm2_5" | "pm10" | "o3" | "no2" | "so2" | "co";
 
 export interface PollutantConfig {
   name: string;
+  nameJSX?: ReactNode;
   unit: string;
   bins: number[];
   colors: string[];
@@ -9,7 +12,7 @@ export interface PollutantConfig {
 }
 
 export interface GeoJsonFeature {
-  type: 'Feature';
+  type: "Feature";
   properties: {
     adm1_name: string;
     adm1_name1?: string | null;
@@ -22,7 +25,7 @@ export interface GeoJsonFeature {
 }
 
 export interface GeoJsonData {
-  type: 'FeatureCollection';
+  type: "FeatureCollection";
   name: string;
   crs: {
     type: string;
@@ -66,7 +69,13 @@ export interface ApiResponse {
   data: AirQualityRecord[];
 }
 
-export type AqiCategory = 'Good' | 'Moderate' | 'Unhealthy for Sensitive Groups' | 'Unhealthy' | 'Very Unhealthy' | 'Hazardous';
+export type AqiCategory =
+  | "Good"
+  | "Moderate"
+  | "Unhealthy for Sensitive Groups"
+  | "Unhealthy"
+  | "Very Unhealthy"
+  | "Hazardous";
 
 export interface AqiInfo {
   label: AqiCategory;
@@ -80,4 +89,4 @@ export interface AqiInfo {
 }
 
 export type SortField = keyof AirQualityRecord;
-export type SortDirection = 'asc' | 'desc';
+export type SortDirection = "asc" | "desc";

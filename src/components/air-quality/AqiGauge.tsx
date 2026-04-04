@@ -8,11 +8,13 @@ export function AqiGauge({
   label,
   usEpaIndex,
   gbDefraIndex,
+  showIndexComparison = false,
 }: {
   value: number;
   label: string;
   usEpaIndex: number;
   gbDefraIndex: number;
+  showIndexComparison?: boolean;
 }) {
   const aqiInfo = getAqiInfo(usEpaIndex);
 
@@ -93,25 +95,27 @@ export function AqiGauge({
         </span>
       </div>
       {/* Index comparison */}
-      <div className="flex items-center justify-center gap-4 mt-4">
-        <div className="text-center">
-          <span className="text-xs text-slate-500 dark:text-slate-400">
-            US EPA
-          </span>
-          <p className="text-lg font-bold text-slate-900 dark:text-white">
-            {usEpaIndex}
-          </p>
+      {showIndexComparison && (
+        <div className="flex items-center justify-center gap-4 mt-4">
+          <div className="text-center">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              US EPA
+            </span>
+            <p className="text-lg font-bold text-slate-900 dark:text-white">
+              {usEpaIndex}
+            </p>
+          </div>
+          <div className="w-px h-8 bg-slate-200 dark:bg-slate-700" />
+          <div className="text-center">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              DEFRA
+            </span>
+            <p className="text-lg font-bold text-slate-900 dark:text-white">
+              {gbDefraIndex}
+            </p>
+          </div>
         </div>
-        <div className="w-px h-8 bg-slate-200 dark:bg-slate-700" />
-        <div className="text-center">
-          <span className="text-xs text-slate-500 dark:text-slate-400">
-            DEFRA
-          </span>
-          <p className="text-lg font-bold text-slate-900 dark:text-white">
-            {gbDefraIndex}
-          </p>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
