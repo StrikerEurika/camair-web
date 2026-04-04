@@ -8,7 +8,7 @@ import type {
   GeoJsonFeature,
   AirQualityData,
   PollutantType,
-} from "@/types/airquality.types";
+} from "@/types/air-quality.types";
 import { POLLUTANT_CONFIG, POLLUTANT_OPTIONS } from "@/config/pollutant.config";
 import {
   getProvinceColor,
@@ -67,7 +67,7 @@ const CambodiaAirQualityMap: React.FC<CambodiaAirQualityMapProps> = ({
       opacity: 1,
       color: "#ffffff",
       fillOpacity: 0.8,
-      dashArray: null,
+      dashArray: undefined,
     };
   };
 
@@ -85,7 +85,7 @@ const CambodiaAirQualityMap: React.FC<CambodiaAirQualityMapProps> = ({
   const resetHighlight = (e: LeafletEvent) => {
     const layer = e.target as L.GeoJSON;
     if (geoJsonRef.current) {
-      const originalStyle = styleProvince(layer.feature as GeoJsonFeature);
+      const originalStyle = styleProvince(layer.feature as unknown as GeoJsonFeature);
       layer.setStyle(originalStyle);
     }
   };
@@ -142,12 +142,12 @@ const CambodiaAirQualityMap: React.FC<CambodiaAirQualityMapProps> = ({
         const geoJsonLayer = layer as L.GeoJSON;
         if (geoJsonLayer.feature) {
           const newStyle = styleProvince(
-            geoJsonLayer.feature as GeoJsonFeature,
+            geoJsonLayer.feature as unknown as GeoJsonFeature,
           );
           geoJsonLayer.setStyle(newStyle);
 
           // Update tooltip
-          const provinceName = (geoJsonLayer.feature as GeoJsonFeature)
+          const provinceName = (geoJsonLayer.feature as unknown as GeoJsonFeature)
             .properties.adm1_name;
           const provinceData = getProvinceData(provinceName, airQualityData);
 
@@ -318,7 +318,7 @@ const CambodiaAirQualityMap: React.FC<CambodiaAirQualityMapProps> = ({
       </MapContainer>
 
       {/* Global styles for tooltips */}
-      <style jsx global>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         .custom-tooltip {
           background: white !important;
           border: 1px solid #e5e7eb !important;
@@ -336,7 +336,7 @@ const CambodiaAirQualityMap: React.FC<CambodiaAirQualityMapProps> = ({
         .leaflet-tooltip-right:before {
           display: none !important;
         }
-      `}</style>
+      ` }} />
     </div>
   );
 };

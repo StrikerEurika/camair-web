@@ -1,34 +1,5 @@
-import type { AirQualityRecord, ApiResponse } from '../types/airQuality';
-import { MOCK_AIR_QUALITY_DATA } from '../data/mockAirQualityData';
-
-// Province geographic coordinates (lat/lng) for map placement
-const PROVINCE_COORDS: Record<string, [number, number]> = {
-  'Phnom Penh':         [11.5564, 104.9282],
-  'Siem Reap':          [13.3671, 103.8448],
-  'Battambang':         [13.1, 103.2],
-  'Kampong Cham':       [11.9936, 105.4635],
-  'Kampong Chhnang':    [12.2502, 104.6672],
-  'Kampong Speu':       [11.4556, 104.5213],
-  'Kampong Thom':       [12.7111, 104.8885],
-  'Kampot':             [10.6098, 104.181],
-  'Kandal':             [11.225,  104.944],
-  'Kep':                [10.4836, 104.3187],
-  'Koh Kong':           [11.6152, 103.5166],
-  'Kratie':             [12.488,  106.0185],
-  'Mondulkiri':         [12.4544, 107.1883],
-  'Oddar Meanchey':     [14.1605, 103.5208],
-  'Pailin':             [12.8494, 102.6076],
-  'Preah Vihear':       [13.8,    104.98],
-  'Prey Veng':          [11.485,  105.325],
-  'Pursat':             [12.5388, 103.9192],
-  'Ratanakiri':         [13.7396, 107.0063],
-  'Sihanoukville':      [10.6145, 103.5291],
-  'Strung Treng':       [13.5262, 105.9703],
-  'Svay Rieng':         [11.0866, 105.7996],
-  'Takeo':              [10.99,   104.785],
-  'Tboung Khmum':       [12.0,    105.6],
-  'Banteay Meanchey':   [13.6573, 102.9892],
-};
+import type { AirQualityRecord, ApiResponse } from '../types/air-quality.types';
+import { MOCK_AIR_QUALITY_DATA, PROVINCE_COORDS } from '../data/mockAirQualityData';
 
 // Realistic static mock data matching the live API structure exactly
 const MOCK_RAW: Omit<AirQualityRecord, 'lat' | 'lng'>[] = [
@@ -110,5 +81,5 @@ export async function fetchAirQuality(): Promise<ApiResponse> {
   }
 }
 
-export { MOCK_DATA, PROVINCE_COORDS };
+export { MOCK_DATA };
 

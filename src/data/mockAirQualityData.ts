@@ -1,6 +1,6 @@
-import type { AirQualityRecord } from '@/types/airQuality';
+import type { AirQualityRecord } from '@/types/air-quality.types';
 
-const PROVINCE_COORDS: Record<string, [number, number]> = {
+export const PROVINCE_COORDS: Record<string, [number, number]> = {
   'Banteay Meanchey':   [13.6573, 102.9892],
   'Battambang':         [13.1, 103.2],
   'Kampong Cham':       [11.9936, 105.4635],

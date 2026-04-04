@@ -5,10 +5,11 @@ import type {
   GeoJsonData,
   GeoJsonFeature,
   PollutantType,
-} from "@/types/airquality.types";
-import type { AirQualityRecord } from "@/types/airQuality";
+  AirQualityRecord,
+} from "@/types/air-quality.types";
 import { POLLUTANT_CONFIG } from "@/config/pollutant.config";
-import { getAqiInfo } from "@/utils/aqiUtils";
+import { getAqiInfo } from "@/utils/aqi-utils";
+import { getProvinceColor, getHealthCategory } from "@/utils/air-quality.utils";
 
 import { formatToUTC7Intl, formatToUTC7 } from "@/utils/time";
 
@@ -44,34 +45,6 @@ function getProvinceValue(
   return record[pollutantKey] ?? null;
 }
 
-function getProvinceFillColor(
-  value: number | null,
-  pollutantKey: PollutantType,
-): string {
-  if (value === null) return "#d1d5db";
-  const config = POLLUTANT_CONFIG[pollutantKey];
-  for (let i = 0; i < config.bins.length; i++) {
-    if (value <= config.bins[i]) {
-      return config.colors[i];
-    }
-  }
-  return config.colors[config.colors.length - 1];
-}
-
-function getHealthCategory(
-  value: number | null,
-  pollutantKey: PollutantType,
-): string {
-  if (value === null) return "No Data";
-  const config = POLLUTANT_CONFIG[pollutantKey];
-  for (let i = 0; i < config.bins.length; i++) {
-    if (value <= config.bins[i]) {
-      return config.labels[i];
-    }
-  }
-  return config.labels[config.labels.length - 1];
-}
-
 function ProvinceGeoJSON({
   geoJsonData,
   airQualityData,
@@ -98,7 +71,7 @@ function ProvinceGeoJSON({
     const isSelected = selectedProvince === name;
 
     return {
-      fillColor: getProvinceFillColor(value, pollutantKey),
+      fillColor: getProvinceColor(value, pollutantKey),
       weight: isSelected ? 3 : 1.5,
       opacity: 1,
       color: isSelected ? "#1e293b" : "#ffffff",
@@ -133,7 +106,7 @@ function ProvinceGeoJSON({
     const category = getHealthCategory(value, pollutantKey);
 
     const tooltipContent = record
-      ? `<div class="p-2 text-sm"><strong>${name}</strong><br/>${config.name}: ${value} ${config.unit}<br/><span style="color: ${getProvinceFillColor(value, pollutantKey)}">${category}</span></div>`
+      ? `<div class="p-2 text-sm"><strong>${name}</strong><br/>${config.name}: ${value} ${config.unit}<br/><span style="color: ${getProvinceColor(value, pollutantKey)}">${category}</span></div>`
       : `<div class="p-2 text-sm"><strong>${name}</strong><br/>No data</div>`;
 
     layer.bindTooltip(tooltipContent, {
@@ -219,7 +192,7 @@ function ProvinceGeoJSON({
           const isSelected = selectedProvince === name;
 
           (layer as L.Path).setStyle({
-            fillColor: getProvinceFillColor(value, pollutantKey),
+            fillColor: getProvinceColor(value, pollutantKey),
             weight: isSelected ? 3 : 1.5,
             color: isSelected ? "#1e293b" : "#ffffff",
             fillOpacity: isSelected ? 0.9 : 0.7,
@@ -227,7 +200,7 @@ function ProvinceGeoJSON({
 
           const category = getHealthCategory(value, pollutantKey);
           const tooltipContent = record
-            ? `<div class="p-2 text-sm"><strong>${name}</strong><br/>${config.name}: ${value} ${config.unit}<br/><span style="color: ${getProvinceFillColor(value, pollutantKey)}">${category}</span></div>`
+            ? `<div class="p-2 text-sm"><strong>${name}</strong><br/>${config.name}: ${value} ${config.unit}<br/><span style="color: ${getProvinceColor(value, pollutantKey)}">${category}</span></div>`
             : `<div class="p-2 text-sm"><strong>${name}</strong><br/>No data</div>`;
 
           layer.unbindTooltip();

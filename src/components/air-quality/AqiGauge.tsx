@@ -1,5 +1,5 @@
-import { getAqiInfo } from "@/utils/aqiUtils";
-import { Badge } from "../ui/Badge";
+import { getAqiInfo } from "@/utils/aqi-utils";
+import { Badge } from "./AqiBadge";
 import { MapPin } from "lucide-react";
 
 // AQI Gauge Component

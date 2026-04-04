@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Cloud, Layers } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { fetchAirQuality } from "@/services/airQualityService";
-import type { AirQualityRecord } from "@/types/airQuality";
+import type { AirQualityRecord, PollutantType } from "@/types/air-quality.types";
 import {
   ViewOptionsPanel,
   ProvinceTable,
@@ -34,7 +34,7 @@ export default function AirQuality() {
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [viewOptionsOpen, setViewOptionsOpen] = useState(false);
   const [viewOptions, setViewOptions] = useState(VIEW_OPTIONS);
-  const [selectedPollutant, setSelectedPollutant] = useState("pm25");
+  const [selectedPollutant, setSelectedPollutant] = useState<PollutantType>("pm2_5");
   const [searchQuery, setSearchQuery] = useState("");
   const [isMapReady, setIsMapReady] = useState(false);
 
@@ -201,7 +201,7 @@ export default function AirQuality() {
           <ProvinceTable
             data={filteredData}
             selectedProvince={selectedProvince}
-            onSelect={setSelectedProvince}
+            onSelectProvince={setSelectedProvince}
           />
         </CardContent>
       </Card>

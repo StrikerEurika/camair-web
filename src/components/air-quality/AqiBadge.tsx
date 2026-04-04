@@ -1,5 +1,6 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
+import { AQI_CATEGORIES } from '@/utils/aqi-utils';
 
 const badgeVariants = cva(
   'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold transition-all',
@@ -25,4 +26,23 @@ interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement>, VariantProps
 
 export function Badge({ className, variant, ...props }: BadgeProps) {
   return <span className={cn(badgeVariants({ variant }), className)} {...props} />;
+}
+
+const AQI_BADGE_MAP: Record<number, { label: string; variant: BadgeVariant }> = {
+  1: { label: 'Good',             variant: 'good'      },
+  2: { label: 'Moderate',         variant: 'moderate'  },
+  3: { label: 'Unhealthy SG',     variant: 'sensitive' },
+  4: { label: 'Unhealthy',        variant: 'unhealthy' },
+  5: { label: 'Very Unhealthy',   variant: 'veryBad'   },
+  6: { label: 'Hazardous',        variant: 'hazardous' },
+};
+
+export function AqiBadge({ index }: { index: number }) {
+  const info = AQI_BADGE_MAP[index] ?? AQI_BADGE_MAP[1];
+  return (
+    <Badge variant={info.variant}>
+      <span className="inline-block w-1.5 h-1.5 rounded-full bg-current" />
+      {info.label}
+    </Badge>
+  );
 }

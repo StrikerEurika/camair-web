@@ -7,14 +7,12 @@ import Calendar from "./pages/Calendar";
 import Settings from "./pages/Settings";
 import AirQuality from "./pages/AirQuality";
 import DashboardLayout from "./layout/DashboardLayout";
-import MapOverlay from "./components/test";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/map" element={<MapOverlay />} />
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<WeatherDashboard />} />
           <Route path="air-quality" element={<AirQuality />} />

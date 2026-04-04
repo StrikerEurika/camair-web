@@ -1,4 +1,4 @@
-import type { AqiInfo } from '../types/airQuality';
+import type { AqiInfo } from '../types/air-quality.types';
 
 // US EPA AQI Category definitions
 export const AQI_CATEGORIES: Record<number, AqiInfo> = {

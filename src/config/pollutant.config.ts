@@ -1,4 +1,4 @@
-import type{ PollutantConfig, PollutantType } from "@/types/airquality.types"
+import type{ PollutantConfig, PollutantType } from "@/types/air-quality.types"
 
 export const POLLUTANT_CONFIG: Record<PollutantType, PollutantConfig> = {
   pm2_5: {

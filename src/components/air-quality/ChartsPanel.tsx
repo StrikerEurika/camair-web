@@ -2,9 +2,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
 } from 'recharts';
-import type { AirQualityRecord } from '@/types/airQuality';
-import { getAqiInfo } from '@/utils/aqiUtils';
-import { AQI_CATEGORIES } from '@/utils/aqiUtils';
+import type { AirQualityRecord } from '@/types/air-quality.types';
+import { getAqiInfo, AQI_CATEGORIES } from '@/utils/aqi-utils';
 
 interface ChartsProps {
   data: AirQualityRecord[];
@@ -37,7 +36,7 @@ function CustomBarTooltip({ active, payload }: CustomTooltipProps) {
 }
 
 function AqiDistributionChart({ data }: { data: AirQualityRecord[] }) {
-  const counts = Object.entries(AQI_CATEGORIES).map(([idx, info]) => ({
+  const counts = Object.entries(AQI_CATEGORIES).map(([idx, info]: [string, any]) => ({
     label: info.label.split(' ')[0],
     count: data.filter((d) => d.us_epa_index === Number(idx)).length,
     hex:   info.hex,

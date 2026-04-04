@@ -1,7 +1,7 @@
 import { CircleMarker, Popup } from 'react-leaflet';
-import { AqiBadge } from '../ui/Badge';
-import { getAqiInfo } from '@/utils/aqiUtils';
-import type { AirQualityRecord } from '@/types/airQuality';
+import { AqiBadge } from './AqiBadge';
+import { getAqiInfo } from '@/utils/aqi-utils';
+import type { AirQualityRecord } from '@/types/air-quality.types';
 
 interface ProvinceMarkerProps {
   record: AirQualityRecord;

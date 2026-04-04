@@ -1,7 +1,7 @@
 import { Target, Activity, Bell, TrendingUp, Check } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { AqiGauge, PollutantChart } from "@/components/air-quality";
-import type { AirQualityRecord } from "@/types/airQuality";
+import type { AirQualityRecord } from "@/types/air-quality.types";
 
 interface ProvinceDetailsPanelProps {
   selectedRecord: AirQualityRecord | null;

@@ -1,4 +1,4 @@
-import type { PollutantType, AirQualityData } from "../types/airquality.types";
+import type { PollutantType, AirQualityData } from "../types/air-quality.types";
 import { POLLUTANT_CONFIG } from "../config/pollutant.config";
 
 export const getProvinceColor = (

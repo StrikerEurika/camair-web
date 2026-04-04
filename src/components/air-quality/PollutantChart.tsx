@@ -11,7 +11,7 @@ import {
 } from "recharts";
 
 // type
-import type { AirQualityRecord } from "@/types/airQuality";
+import type { AirQualityRecord } from "@/types/air-quality.types";
 
 export function PollutantChart({
   data,

@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, useMap } from "react-leaflet";
 
 import type { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import type { AirQualityRecord } from "@/types/airQuality";
+import type { AirQualityRecord } from "@/types/air-quality.types";
 import { ProvinceMapOverlay } from "@/components/map/ProvinceMapOverlay";
 import cambodiaGeoJsonUrl from "@/assets/geoData/cambodia-provinces.geojson?url";
 
